@@ -22,7 +22,7 @@ espressoCore = "3.5.1"
 kotlinxCoroutinesPlayServices = "1.9.0"
 lifecycleRuntimeKtx = "2.8.0"
 activityCompose = "1.9.0"
-composeBom = "2023.08.00"
+composeBom = "2024.04.00"
 loggingInterceptor = "4.12.0"
 okhttp = "4.12.0"
 okhttpUrlconnection = "4.12.0"
@@ -49,7 +49,8 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
