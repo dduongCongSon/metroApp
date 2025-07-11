@@ -77,7 +77,7 @@ fun QuickActionsSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(210.dp) // đủ để chứa cả Card và indicator
+            .height(210.dp)
             .padding(horizontal = 10.dp)
     ) {
         // Card chứa grid
@@ -85,7 +85,7 @@ fun QuickActionsSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(190.dp)
-                .align(Alignment.TopCenter), // đảm bảo nó nằm trên
+                .align(Alignment.TopCenter),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -126,11 +126,10 @@ fun QuickActionsSection(
             }
         }
 
-        // ✅ Page indicator floating ở đáy
         if (pages.size > 1) {
             Row(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter) // ✅ Bảo đảm nằm ở đáy của Box
+                    .align(Alignment.BottomCenter)
                     .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -174,14 +173,14 @@ fun QuickActionItem(
                 modifier = Modifier
                     .size(32.dp) // FIXED: Slightly smaller icon to save space
                     .clip(CircleShape)
-                    .background(Color(0xFF4CAF50).copy(alpha = 0.2f)),
+                    .background(Color(0xFF64B5F6).copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painter = icon,
                     contentDescription = title,
-                    modifier = Modifier.size(18.dp), // FIXED: Smaller icon size
-                    tint = Color(0xFF4CAF50)
+                    modifier = Modifier.size(18.dp),
+                    tint = Color(0xFF2196F3)
                 )
             }
 

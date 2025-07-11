@@ -14,14 +14,30 @@ import org.com.metro.constant.UserRole
 import org.com.metro.ui.components.common.AppHomeScreen
 import org.com.metro.ui.screens.guide.GuideSection
 import org.com.metro.ui.screens.news.NewsSection
+import org.com.metro.ui.screens.metro.myticket.YourTicket
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import org.com.metro.ui.screens.login.LoginViewModel
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController,
+               loginViewModel: LoginViewModel = hiltViewModel()
+) {
+    val userProfile by loginViewModel.userProfile.collectAsState()
+    val userName = userProfile?.name ?: "Guest"
     AppHomeScreen(
         navController = navController,
         showFloatingButton = true,
-        role = UserRole.USER
+        role = UserRole.USER,
+        userName = userName
         ) {
+
+        item {
+            Spacer(modifier = Modifier.height(20.dp))
+            YourTicket(navController)
+        }
+
         item {
             Spacer(modifier = Modifier.height(30.dp))
             Box(modifier = Modifier.padding(start = 16.dp)) {

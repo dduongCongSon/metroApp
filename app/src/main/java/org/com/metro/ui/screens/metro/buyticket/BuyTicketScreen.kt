@@ -18,26 +18,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalActivity
-import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Star // Giữ lại nếu muốn icon cho SectionHeader khác
 import androidx.compose.material.icons.filled.WavingHand
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.Surface // Import Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,59 +48,45 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import org.com.metro.Screen
+import org.com.metro.Screen // Đảm bảo Screen được import đúng từ package của bạn
 import org.com.metro.repositories.apis.ticket.TicketType
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.clip
 import androidx.hilt.navigation.compose.hiltViewModel
-import org.com.metro.FareMatrix
 
+// Thêm các imports cần thiết từ file đầu tiên
+import androidx.navigation.compose.currentBackStackEntryAsState // Cho selectedStationFrom/To
+import androidx.compose.material.icons.filled.Search // Icon tìm kiếm
+import androidx.compose.ui.text.style.TextOverflow // Cho TextOverflow.Ellipsis
+
+// Định nghĩa lại các màu từ file đầu tiên để sử dụng trong SearchStationCard
+private val AppWhite = Color(0xFFFFFFFF)
+private val AppLightGray = Color(0xFFF0F0F0) // Có thể điều chỉnh cho phù hợp với LightGreenBackground
+private val AppMediumGray = Color(0xFFB0B0B0)
+private val AppDarkGray = Color(0xFF424242)
+
+
+// Data classes (giữ nguyên hoặc đã chỉnh sửa nếu cần)
 data class TicketOption(
     val title: String,
     val price: String,
     val icon: ImageVector = Icons.Default.ConfirmationNumber
 )
-data class RouteInfo(
+data class RouteInfo( // Giữ lại nếu bạn vẫn dùng đâu đó, nếu không có thể xóa
     val from: String,
     val to: String,
     val details: String = "Xem chi tiết"
 )
 
+// Màu sắc chủ đạo (giữ nguyên)
 private val PrimaryGreen = Color(0xFF4CAF50)
 private val DarkGreen = Color(0xFF388E3C)
 private val LightGreenBackground = Color(0xFFE8F5E9)
 private val TextPrimaryColor = Color(0xFF212121)
 private val TextSecondaryColor = Color(0xFF757575)
 
-// --- TOP BAR ---
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BuyTicketTopBar(onBackClick: () -> Unit) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = "Mua vé",
-                color = PrimaryGreen,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Trở về",
-                    tint = PrimaryGreen
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
-        )
-    )
-}
 
-// --- WELCOME CARD ---
+// --- WELCOME CARD --- (Giữ nguyên)
 @Composable
 fun WelcomeCard() {
     Card(
@@ -143,7 +125,7 @@ fun WelcomeCard() {
     }
 }
 
-// --- SECTION HEADER ---
+// --- SECTION HEADER --- (Giữ nguyên)
 @Composable
 fun SectionHeader(title: String, icon: ImageVector) {
     Row(
@@ -168,7 +150,7 @@ fun SectionHeader(title: String, icon: ImageVector) {
     }
 }
 
-// --- TICKET CARD ---
+// --- TICKET CARD --- (Giữ nguyên)
 @Composable
 fun TicketCard(
     ticket: TicketType,
@@ -178,7 +160,6 @@ fun TicketCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                // LOGIC GỐC: Được giữ nguyên
                 if (ticket.name == "Single") {
                     navController.navigate(Screen.StationSelection.route)
                 } else {
@@ -236,65 +217,98 @@ fun TicketCard(
     }
 }
 
-// --- ROUTE CARD ---
+// --- COMPONENT TÌM KIẾM GA (MỚI TỪ FILE ĐẦU TIÊN) ---
 @Composable
-fun RouteCard(fareMatrix: FareMatrix) {
+fun SearchStationCard(
+    navController: NavHostController,
+    selectedStationFrom: String,
+    selectedStationTo: String // Giữ lại nếu bạn muốn dùng cho ga đến, hoặc xóa nếu chỉ có ga đi
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { /* LOGIC GỐC: Handle route selection */ },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, Color(0xFFE0E0E0))
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = AppWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Tìm kiếm ga:",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = AppDarkGray
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clickable {
+                        navController.navigate(Screen.Home.route + "?focusField=from")
+                    },
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, AppMediumGray.copy(alpha = 0.5f))
+            ) {
+                Row(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LightGreenBackground),
-                    contentAlignment = Alignment.Center
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Route,
-                        contentDescription = fareMatrix.name,
-                        tint = PrimaryGreen,
-                        modifier = Modifier.size(28.dp)
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = AppMediumGray
                     )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Tuyến: ${fareMatrix.name}",
-                        color = TextPrimaryColor,
+                        text = if (selectedStationFrom != "Chọn ga khởi hành") selectedStationFrom else "Nhập tên ga...",
+                        color = if (selectedStationFrom != "Chọn ga khởi hành") AppDarkGray else AppMediumGray,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "Giá: ${fareMatrix.price} đ",
-                        fontSize = 14.sp,
-                        color = TextSecondaryColor
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-            Text(
-                text = "Xem",
-                color = PrimaryGreen,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { /* LOGIC GỐC: Handle details */ }
-            )
+            // Bạn có thể thêm Search cho "ga điểm đến" tương tự nếu cần
+            /*
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clickable {
+                        navController.navigate(Screen.SearchStation.route + "?focusField=to")
+                    },
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, AppMediumGray.copy(alpha = 0.5f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = AppMediumGray
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = if (selectedStationTo != "Chọn ga điểm đến") selectedStationTo else "Nhập ga điểm đến...",
+                        color = if (selectedStationTo != "Chọn ga điểm đến") AppDarkGray else AppMediumGray,
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            */
         }
     }
 }
+
 
 // --- CÁC SECTION CHÍNH ---
 @Composable
@@ -302,7 +316,6 @@ fun TicketOptionsSection(
     navController: NavHostController,
     viewModel: BuyTicketViewModel
 ) {
-    // LOGIC GỐC: Được giữ nguyên
     val ticketOptions by viewModel.ticketTypes.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
@@ -321,38 +334,30 @@ fun TicketOptionsSection(
         Text(text = "Lỗi tải dữ liệu: $errorMessage", color = Color.Red, modifier = Modifier.padding(16.dp))
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            ticketOptions.forEach { ticket ->
-                TicketCard(ticket = ticket, navController = navController)
+            // Hiển thị thông báo khi danh sách rỗng sau khi tải thành công
+            if (ticketOptions.isEmpty()) {
+                Text(
+                    text = "Hiện không có loại vé nào khả dụng.",
+                    color = TextSecondaryColor,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            } else {
+                ticketOptions.forEach { ticket ->
+                    TicketCard(ticket = ticket, navController = navController)
+                }
             }
         }
     }
 }
 
-@Composable
-fun RoutesSection(viewModel: FareMatrixViewModel) {
-    // LOGIC GỐC: Được giữ nguyên
-    val uiState by viewModel.uiState.collectAsState()
+// --- ROUTE CARD --- (Đã bị loại bỏ khỏi BuyTicketScreen chính)
+// @Composable
+// fun RouteCard(fareMatrix: FareMatrix) { ... }
 
-    LaunchedEffect(Unit) {
-        if (uiState.fareMatrices.isEmpty() && !uiState.isLoading && uiState.errorMessage == null) {
-            viewModel.fetchFareMatrices()
-        }
-    }
-
-    if (uiState.isLoading) {
-        Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = PrimaryGreen)
-        }
-    } else if (uiState.errorMessage != null) {
-        Text(text = "Lỗi tải tuyến đường: ${uiState.errorMessage}", color = Color.Red, modifier = Modifier.padding(16.dp))
-    } else {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            uiState.fareMatrices.forEach { fareMatrix ->
-                RouteCard(fareMatrix = fareMatrix)
-            }
-        }
-    }
-}
+// --- ROUTES SECTION --- (Đã bị loại bỏ khỏi BuyTicketScreen chính)
+// @Composable
+// fun RoutesSection(viewModel: FareMatrixViewModel) { ... }
 
 
 // --- MÀN HÌNH CHÍNH: BUY TICKET SCREEN ---
@@ -361,10 +366,18 @@ fun RoutesSection(viewModel: FareMatrixViewModel) {
 fun BuyTicketScreen(
     navController: NavHostController,
     buyTicketViewModel: BuyTicketViewModel = hiltViewModel(),
+    // FareMatrixViewModel không còn được sử dụng trực tiếp trong UI này nữa,
+    // nhưng vẫn có thể giữ lại nếu nó cần cho các phần khác hoặc xử lý nền.
+    // Nếu không, bạn có thể xóa nó khỏi tham số.
     fareMatrixViewModel: FareMatrixViewModel = hiltViewModel()
 ) {
+    // Lấy trạng thái của ga đã chọn từ NavController's savedStateHandle
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val selectedStationFrom = navBackStackEntry?.savedStateHandle?.get<String>("selectedFromStation") ?: "Chọn ga khởi hành"
+    val selectedStationTo = navBackStackEntry?.savedStateHandle?.get<String>("selectedToStation") ?: "Chọn ga điểm đến"
+
+
     Scaffold(
-        topBar = { BuyTicketTopBar(onBackClick = { navController.popBackStack() }) },
         containerColor = Color.White // Nền trắng cho toàn màn hình
     ) { padding ->
         Column(
@@ -385,9 +398,17 @@ fun BuyTicketScreen(
             WelcomeCard()
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Thêm component tìm kiếm ga vào đây
+            SearchStationCard(
+                navController = navController,
+                selectedStationFrom = selectedStationFrom,
+                selectedStationTo = selectedStationTo
+            )
+            Spacer(modifier = Modifier.height(24.dp)) // Khoảng cách sau search card
+
             SectionHeader(title = "Mua vé theo lượt", icon = Icons.Default.LocalActivity)
             Spacer(modifier = Modifier.height(12.dp))
-            TicketOptionsSection(navController, buyTicketViewModel) // LOGIC GỐC
+            TicketOptionsSection(navController, buyTicketViewModel)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -404,11 +425,12 @@ fun BuyTicketScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SectionHeader(title = "Các tuyến nổi bật", icon = Icons.Default.Star)
-            Spacer(modifier = Modifier.height(12.dp))
-            RoutesSection(fareMatrixViewModel)
+            // Bỏ phần "Các tuyến nổi bật" và RoutesSection
+            // SectionHeader(title = "Các tuyến nổi bật", icon = Icons.Default.Star)
+            // Spacer(modifier = Modifier.height(12.dp))
+            // RoutesSection(fareMatrixViewModel) // Đã xóa
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Spacer(modifier = Modifier.height(24.dp)) // Có thể bỏ nếu không còn phần trên
 
             SectionHeader(title = "Vé dài hạn", icon = Icons.Default.DateRange)
             Spacer(modifier = Modifier.height(12.dp))
@@ -425,9 +447,3 @@ fun BuyTicketScreenPreview() {
     val navController = rememberNavController()
     BuyTicketScreen(navController = navController)
 }
-
-
-
-
-
-
