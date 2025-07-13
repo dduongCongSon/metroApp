@@ -32,16 +32,15 @@ fun CustomTopAppBar(
     navigationIcon: @Composable () -> Unit,
     titleColor: Color = Color.White,
     iconColor: Color = Color.White,
-    height: Dp = 70.dp,
-    backgroundImage: Painter? = null, // Vẫn nhận Painter
-    backgroundBrush: Brush? = null // Có thể nhận cả Brush (nếu muốn chuyển đổi)
+    height: Dp = 75.dp,
+    backgroundImage: Painter? = null,
+    backgroundBrush: Brush? = null
 ) {
-    // Sử dụng Box để xếp chồng ảnh background và TopAppBar
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(height)
-            .shadow(elevation = 4.dp) // Shadow áp dụng cho Box để có bóng đổ cho toàn bộ thanh
+            .shadow(elevation = 4.dp)
     ) {
         // Ảnh nền
         if (backgroundImage != null) {
@@ -52,10 +51,8 @@ fun CustomTopAppBar(
                 contentScale = ContentScale.Crop // Cắt ảnh để lấp đầy không gian
             )
         } else if (backgroundBrush != null) {
-            // Nếu có Brush, sử dụng Brush
             Spacer(modifier = Modifier.fillMaxSize().background(backgroundBrush))
         } else {
-            // Mặc định nếu không có ảnh hoặc gradient (hoặc có thể đặt màu solid mặc định)
             Spacer(modifier = Modifier.fillMaxSize().background(Color.Transparent))
         }
 

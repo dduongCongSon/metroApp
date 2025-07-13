@@ -27,6 +27,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
+// Màu sắc được định nghĩa để nhất quán với OrderInfoScreenContent
+private val BackgroundColor = Color(0xFFF5F5F5)
+private val CardBackgroundColor = Color.White
+private val PrimaryTextColor = Color(0xFF1A237E) // Màu xanh đậm cho tiêu đề
+private val SecondaryTextColor = Color(0xFF333333) // Màu chữ thông thường
+private val HintTextColor = Color(0xFF999999) // Màu chữ gợi ý/disabled
+private val AccentGreen = Color(0xFF4CAF50) // Màu xanh lá cây cho nút thanh toán, checkmark
+private val AccentBlue = Color(0xFF4A90E2) // Màu xanh dương cho điều khoản
+private val WarningRed = Color(0xFFE53935) // Màu đỏ cho lưu ý quan trọng
+
 data class OrderInfo(
     val ticketType: String,
     val unitPrice: String,
@@ -45,7 +55,7 @@ data class PaymentMethod(
 @Composable
 fun OrderInfoScreen(
     navController: NavHostController,
-    viewModel: OrderInfoViewModel  = hiltViewModel()
+    viewModel: OrderInfoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -61,7 +71,7 @@ fun OrderInfoScreen(
                     Icon(
                         imageVector = Icons.Default.CreditCard,
                         contentDescription = "MoMo",
-                        tint = Color(0xFFE91E63),
+                        tint = Color(0xFFE91E63), // Momo Pink
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -73,7 +83,7 @@ fun OrderInfoScreen(
                     Icon(
                         imageVector = Icons.Default.CreditCard,
                         contentDescription = "ZaloPay",
-                        tint = Color(0xFF0066CC),
+                        tint = Color(0xFF0066CC), // ZaloPay Blue
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -85,7 +95,7 @@ fun OrderInfoScreen(
                     Icon(
                         imageVector = Icons.Default.CreditCard,
                         contentDescription = "VNPay",
-                        tint = Color(0xFF1976D2),
+                        tint = Color(0xFF1976D2), // VNPay Blue
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -132,123 +142,116 @@ fun OrderInfoScreen(
 
     var isTicketInfoExpanded by remember { mutableStateOf(true) }
 
-    Scaffold(
-        topBar = {
-            OrderInfoTopBar(
-                title = "Thông tin đơn hàng",
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-    ) { padding ->
-        Column(
+    // Loại bỏ Scaffold và TopBar
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundColor) // Nền màu xám nhạt
+            .verticalScroll(rememberScrollState()) // Có thể cuộn
+    ) {
+        // Có thể thêm Spacer ở đầu nếu muốn có khoảng trống từ mép trên cùng
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Payment Method Section
+        PaymentMethodSection(
+            selectedPaymentMethod = selectedPaymentMethod,
+            paymentMethods = paymentMethods,
+            onPaymentMethodSelected = { selectedPaymentMethod = it }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Payment Info Section
+        PaymentInfoSection(orderInfo = orderInfo)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Ticket Info Section
+        TicketInfoSection(
+            orderInfo = orderInfo,
+            isExpanded = isTicketInfoExpanded,
+            onExpandClick = { isTicketInfoExpanded = !isTicketInfoExpanded }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Terms Text
+        Text(
+            text = "Bằng việc bấm thanh toán, bạn đồng ý với điều khoản của Metro",
+            fontSize = 12.sp,
+            color = AccentBlue, // Màu xanh dương cho điều khoản
+            textAlign = TextAlign.Center,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF5F5F5))   // color background
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .clickable { /* Handle terms click */ }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Payment Button
+        Button(
+            onClick = {
+                // Handle payment action
+                if (selectedPaymentMethod != null) {
+                    // Proceed with payment
+                } else {
+                    // Show message to select payment method
+                }
+            },
+            enabled = selectedPaymentMethod != null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 16.dp), // Áp dụng padding horizontal
+            shape = RoundedCornerShape(28.dp), // Bo góc 28.dp cho nút
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AccentGreen, // Màu xanh lá
+                disabledContainerColor = HintTextColor.copy(alpha = 0.5f) // Màu xám mờ khi disabled
+            )
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Payment Method Section
-            PaymentMethodSection(
-                selectedPaymentMethod = selectedPaymentMethod,
-                paymentMethods = paymentMethods,
-                onPaymentMethodSelected = { selectedPaymentMethod = it }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Payment Info Section
-            PaymentInfoSection(orderInfo = orderInfo)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Ticket Info Section
-            TicketInfoSection(
-                orderInfo = orderInfo,
-                isExpanded = isTicketInfoExpanded,
-                onExpandClick = { isTicketInfoExpanded = !isTicketInfoExpanded }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Terms Text
             Text(
-                text = "Bằng việc bấm thanh toán, bạn đồng ý với điều khoản của Metro",
-                fontSize = 12.sp,
-                color = Color(0xFF4CAF50),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .clickable { /* Handle terms click */ }
+                text = "Thanh toán: ${orderInfo.totalPrice}",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.White
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Payment Button
-            Button(
-                onClick = {
-                    // Handle payment action
-                    if (selectedPaymentMethod != null) {
-                        // Proceed with payment
-                    } else {
-                        // Show message to select payment method
-                    }
-                },
-                enabled = selectedPaymentMethod != null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selectedPaymentMethod != null)
-                        Color(0xFF4CAF50) else Color(0xFF999999),
-                    disabledContainerColor = Color(0xFF999999)
-                )
-            ) {
-                Text(
-                    text = "Thanh toán: ${orderInfo.totalPrice}",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun OrderInfoTopBar(
-    title: String,
-    onBackClick: () -> Unit
-) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = title,
-                color = Color(0xFF1A237E),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color(0xFF1A237E)
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White
-        )
-    )
-}
+// Xóa OrderInfoTopBar vì không dùng Scaffold
+// @OptIn(ExperimentalMaterial3Api::class)
+// @Composable
+// fun OrderInfoTopBar(
+//     title: String,
+//     onBackClick: () -> Unit
+// ) {
+//     CenterAlignedTopAppBar(
+//         title = {
+//             Text(
+//                 text = title,
+//                 color = PrimaryTextColor,
+//                 fontSize = 18.sp,
+//                 fontWeight = FontWeight.Medium
+//             )
+//         },
+//         navigationIcon = {
+//             IconButton(onClick = onBackClick) {
+//                 Icon(
+//                     imageVector = Icons.Default.ArrowBack,
+//                     contentDescription = "Back",
+//                     tint = PrimaryTextColor
+//                 )
+//             }
+//         },
+//         colors = TopAppBarDefaults.topAppBarColors(
+//             containerColor = Color.White
+//         )
+//     )
+// }
+
 
 @Composable
 fun PaymentMethodSection(
@@ -259,32 +262,30 @@ fun PaymentMethodSection(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .padding(horizontal = 16.dp), // Padding horizontal cho Card
+        shape = RoundedCornerShape(12.dp), // Bo góc 12.dp
+        colors = CardDefaults.cardColors(containerColor = CardBackgroundColor), // Nền trắng
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // Đổ bóng nhẹ
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp) // Padding nội dung Card
         ) {
             Text(
                 text = "Phương thức thanh toán",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF1A237E)
+                color = PrimaryTextColor // Màu xanh đậm
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             if (selectedPaymentMethod == null) {
-                // Show "Select payment method" when none is selected
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // Navigate to payment method selection screen
-                            // For demo, just select the first method
-                            onPaymentMethodSelected(paymentMethods.first())
+                            // Logic chọn phương thức thanh toán
+                            onPaymentMethodSelected(paymentMethods.first()) // Chọn mặc định
                         }
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -296,31 +297,29 @@ fun PaymentMethodSection(
                         Icon(
                             imageVector = Icons.Default.CreditCard,
                             contentDescription = "Payment Method",
-                            tint = Color(0xFF4CAF50),
+                            tint = HintTextColor, // Màu xám cho icon khi chưa chọn
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = "Chọn phương thức thanh toán",
                             fontSize = 14.sp,
-                            color = Color(0xFF999999)
+                            color = HintTextColor // Màu xám
                         )
                     }
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowRight,
                         contentDescription = "Arrow Right",
-                        tint = Color(0xFF999999),
+                        tint = HintTextColor,
                         modifier = Modifier.size(20.dp)
                     )
                 }
             } else {
-                // Show selected payment method
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            // Navigate to change payment method
-                            // For demo, cycle through methods
+                            // Logic thay đổi phương thức thanh toán
                             val currentIndex = paymentMethods.indexOf(selectedPaymentMethod)
                             val nextIndex = (currentIndex + 1) % paymentMethods.size
                             onPaymentMethodSelected(paymentMethods[nextIndex])
@@ -337,7 +336,7 @@ fun PaymentMethodSection(
                         Text(
                             text = selectedPaymentMethod.name,
                             fontSize = 14.sp,
-                            color = Color(0xFF333333),
+                            color = SecondaryTextColor, // Màu chữ thông thường
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -347,14 +346,14 @@ fun PaymentMethodSection(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Selected",
-                            tint = Color(0xFF4CAF50),
+                            tint = AccentGreen, // Màu xanh lá cho checkmark
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Change",
-                            tint = Color(0xFF999999),
+                            tint = HintTextColor,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -372,7 +371,7 @@ fun PaymentInfoSection(orderInfo: OrderInfo) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
@@ -382,12 +381,11 @@ fun PaymentInfoSection(orderInfo: OrderInfo) {
                 text = "Thông tin thanh toán",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF1A237E)
+                color = PrimaryTextColor
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Product
             PaymentInfoRow(
                 label = "Sản phẩm:",
                 value = orderInfo.ticketType
@@ -395,7 +393,6 @@ fun PaymentInfoSection(orderInfo: OrderInfo) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Unit Price
             PaymentInfoRow(
                 label = "Đơn giá:",
                 value = orderInfo.unitPrice
@@ -403,7 +400,6 @@ fun PaymentInfoSection(orderInfo: OrderInfo) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Quantity
             PaymentInfoRow(
                 label = "Số lượng:",
                 value = orderInfo.quantity.toString()
@@ -411,7 +407,6 @@ fun PaymentInfoSection(orderInfo: OrderInfo) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Subtotal
             PaymentInfoRow(
                 label = "Thành tiền:",
                 value = orderInfo.totalPrice
@@ -419,11 +414,10 @@ fun PaymentInfoSection(orderInfo: OrderInfo) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Divider(color = Color(0xFFE0E0E0))
+            Divider(color = HintTextColor.copy(alpha = 0.3f)) // Divider màu xám nhạt
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Total Price
             PaymentInfoRow(
                 label = "Tổng giá tiền:",
                 value = orderInfo.totalPrice,
@@ -432,11 +426,10 @@ fun PaymentInfoSection(orderInfo: OrderInfo) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Final Amount
             PaymentInfoRow(
                 label = "Thành tiền:",
                 value = orderInfo.totalPrice,
-                isTotal = true
+                isTotal = true // Có vẻ dòng này bị trùng, có thể xem xét bỏ bớt
             )
         }
     }
@@ -456,13 +449,13 @@ fun PaymentInfoRow(
             text = label,
             fontSize = if (isTotal) 15.sp else 14.sp,
             fontWeight = if (isTotal) FontWeight.Medium else FontWeight.Normal,
-            color = Color(0xFF333333)
+            color = if (isTotal) PrimaryTextColor else SecondaryTextColor // Màu đậm hơn cho tổng cộng
         )
         Text(
             text = value,
             fontSize = if (isTotal) 15.sp else 14.sp,
             fontWeight = if (isTotal) FontWeight.Medium else FontWeight.Normal,
-            color = Color(0xFF333333)
+            color = if (isTotal) PrimaryTextColor else SecondaryTextColor // Màu đậm hơn cho tổng cộng
         )
     }
 }
@@ -478,13 +471,12 @@ fun TicketInfoSection(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -496,21 +488,19 @@ fun TicketInfoSection(
                     text = "Thông tin ${orderInfo.ticketType}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFF1A237E)
+                    color = PrimaryTextColor
                 )
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowRight,
                     contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    tint = Color(0xFF1A237E),
+                    tint = PrimaryTextColor,
                     modifier = Modifier.size(20.dp)
                 )
             }
 
-            // Expandable Content
             if (isExpanded) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Ticket Type
                 TicketDetailRow(
                     label = "Loại vé:",
                     value = orderInfo.ticketType
@@ -518,7 +508,6 @@ fun TicketInfoSection(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Validity
                 TicketDetailRow(
                     label = "HSD:",
                     value = orderInfo.validity
@@ -526,11 +515,10 @@ fun TicketInfoSection(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Note
                 TicketDetailRow(
                     label = "Lưu ý:",
                     value = orderInfo.note,
-                    valueColor = Color(0xFFE53935)
+                    valueColor = WarningRed // Màu đỏ cho lưu ý
                 )
             }
         }
@@ -541,7 +529,7 @@ fun TicketInfoSection(
 fun TicketDetailRow(
     label: String,
     value: String,
-    valueColor: Color = Color(0xFF333333)
+    valueColor: Color = SecondaryTextColor // Màu chữ thông thường cho giá trị
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -550,7 +538,7 @@ fun TicketDetailRow(
             text = label,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF666666)
+            color = HintTextColor // Màu xám cho label
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -562,7 +550,7 @@ fun TicketDetailRow(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun OrderInfoScreenPreview() {
     val navController = rememberNavController()

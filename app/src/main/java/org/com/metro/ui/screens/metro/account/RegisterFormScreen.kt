@@ -1,11 +1,9 @@
 package org.com.metro.ui.screens.metro.account
 
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.AppRegistration
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
@@ -39,11 +36,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -51,6 +46,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+
+// Định nghĩa bảng màu theo yêu cầu của bạn
+private val BluePrimary = Color(0xFF2196F3)      // Màu xanh chủ đạo
+private val BlueLight = Color(0xFF64B5F6)       // Màu xanh nhạt hơn, dùng cho primaryContainer
+private val BlueDark = Color(0xFF1976D2)        // Màu xanh đậm hơn, dùng cho secondary
+
+// Các màu phụ trợ để đảm bảo giao diện đẹp mắt
+private val BackgroundLightGray = Color(0xFFF0F2F5) // Nền tổng thể nhẹ nhàng
+private val TextDark = Color(0xFF333333)            // Màu chữ chính
+private val TextMedium = Color(0xFF666666)          // Màu chữ phụ
+private val LightGrayBorder = Color(0xFFCCCCCC)     // Màu border cho OutlinedTextField khi không focus
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,37 +72,18 @@ fun RegisterFormScreen(navController: NavController) {
     var selectedGender by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
-    Scaffold (
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Form đăng ký xác thực CCCD",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PrimaryGreen
-                ),
-                navigationIcon = {
-                    IconButton (onClick = { navController.popBackStack() }) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        Column (
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundLightGray) // Áp dụng màu nền tổng thể
+            .verticalScroll(rememberScrollState()), // Cho phép cuộn
+        // Padding trên cùng để bù đắp cho việc bỏ TopAppBar
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp), // Padding cho nội dung form
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Form Fields
@@ -112,7 +99,7 @@ fun RegisterFormScreen(navController: NavController) {
                 value = birthDate,
                 onValueChange = { birthDate = it },
                 label = "Ngày sinh",
-                placeholder = "Nhập ngày sinh",
+                placeholder = "Ngày/Tháng/Năm", // Format gợi ý
                 icon = Icons.Default.DateRange
             )
 
@@ -128,7 +115,7 @@ fun RegisterFormScreen(navController: NavController) {
                 value = issueDate,
                 onValueChange = { issueDate = it },
                 label = "Ngày cấp CCCD hoặc Căn Cước",
-                placeholder = "Nhập ngày cấp",
+                placeholder = "Ngày/Tháng/Năm",
                 icon = Icons.Default.DateRange
             )
 
@@ -136,7 +123,7 @@ fun RegisterFormScreen(navController: NavController) {
                 value = expiryDate,
                 onValueChange = { expiryDate = it },
                 label = "Ngày hết hạn CCCD hoặc Căn Cước",
-                placeholder = "Nhập hết hạn",
+                placeholder = "Ngày/Tháng/Năm",
                 icon = Icons.Default.DateRange
             )
 
@@ -148,53 +135,31 @@ fun RegisterFormScreen(navController: NavController) {
                 icon = Icons.Default.Person
             )
 
-            // Gender Dropdown
-            Card (
+            // Gender Selection Card
+            Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White) // Nền trắng cho Card giới tính
             ) {
-                Column  (
+                Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
                         "Giới tính *",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        color = DarkGreen
+                        color = TextDark // Màu chữ tối
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Row (
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp) // Giảm khoảng cách giữa các chip
                     ) {
-                        FilterChip(
-                            onClick = { selectedGender = "Nam" },
-                            label = { Text("Nam") },
-                            selected = selectedGender == "Nam",
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = PrimaryGreen,
-                                selectedLabelColor = Color.White
-                            )
-                        )
-                        FilterChip(
-                            onClick = { selectedGender = "Nữ" },
-                            label = { Text("Nữ") },
-                            selected = selectedGender == "Nữ",
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = PrimaryGreen,
-                                selectedLabelColor = Color.White
-                            )
-                        )
-                        FilterChip(
-                            onClick = { selectedGender = "Khác" },
-                            label = { Text("Khác") },
-                            selected = selectedGender == "Khác",
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = PrimaryGreen,
-                                selectedLabelColor = Color.White
-                            )
-                        )
+                        // Gọi GenderFilterChip với tham số 'selected'
+                        GenderFilterChip(label = "Nam", selected = selectedGender == "Nam") { selectedGender = "Nam" }
+                        GenderFilterChip(label = "Nữ", selected = selectedGender == "Nữ") { selectedGender = "Nữ" }
+                        GenderFilterChip(label = "Khác", selected = selectedGender == "Khác") { selectedGender = "Khác" }
                     }
                 }
             }
@@ -210,26 +175,29 @@ fun RegisterFormScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // Submit Button
-            Button (
+            Button(
                 onClick = { /* Handle registration */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                colors = ButtonDefaults.buttonColors(containerColor = BluePrimary) // Nút màu BluePrimary
             ) {
                 Icon(
                     Icons.Default.AppRegistration,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
+                    tint = Color.White // Icon màu trắng
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     "Đăng ký ngay",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White // Chữ màu trắng
                 )
             }
+            Spacer(modifier = Modifier.height(20.dp)) // Thêm khoảng trống dưới cùng
         }
     }
 }
@@ -244,34 +212,59 @@ fun FormTextField(
     icon: ImageVector
 ) {
     Column {
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             "$label *",
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = DarkGreen
+            color = TextDark // Màu chữ tối cho label
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = Color.Gray) },
+            placeholder = { Text(placeholder, color = TextMedium) }, // Placeholder màu trung tính
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryGreen,
-                focusedLabelColor = PrimaryGreen
+                focusedBorderColor = BluePrimary, // Border khi focus màu BluePrimary
+                unfocusedBorderColor = LightGrayBorder, // Border khi không focus
+                focusedLabelColor = BluePrimary,
+                unfocusedLabelColor = TextMedium,
+                cursorColor = BluePrimary,
+                focusedLeadingIconColor = BluePrimary,
+                unfocusedLeadingIconColor = TextMedium
             ),
             leadingIcon = {
                 Icon(
                     icon,
                     contentDescription = null,
-                    tint = PrimaryGreen,
                     modifier = Modifier.size(20.dp)
                 )
             }
         )
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GenderFilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        onClick = onClick,
+        label = { Text(label) },
+        selected = selected,
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = selected,
+            borderColor = LightGrayBorder,
+            selectedBorderColor = BluePrimary,
+            borderWidth = 1.dp,
+            selectedBorderWidth = 1.dp
+        ),
+        shape = RoundedCornerShape(8.dp) // Bo góc cho chip
+    )
+}
+
 
 @Preview(showBackground = true)
 @Composable

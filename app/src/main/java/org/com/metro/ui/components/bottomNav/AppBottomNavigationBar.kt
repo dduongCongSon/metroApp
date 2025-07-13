@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -33,13 +34,14 @@ data class BottomNavItem(
 fun AppBottomNavigationBar(
     modifier: Modifier = Modifier,
     navController: NavHostController,
+    height: Dp = 90.dp,
     currentRoute: String?
 ) {
     val navItems = listOf(
         BottomNavItem(Icons.Default.Home, "Home", Screen.Home.route),
         BottomNavItem(Icons.Default.Search, "Search", Screen.BuyTicket.route),
         BottomNavItem(Icons.Default.QrCodeScanner, "My Ticket", Screen.MyTicket.route),
-        BottomNavItem(Icons.Default.Settings, "Account", Screen.Account.route)
+        BottomNavItem(Icons.Default.Person, "Account", Screen.Account.route)
     )
 
     val selectedContentColor = Color(0xFF4A6FA5)
@@ -51,9 +53,11 @@ fun AppBottomNavigationBar(
     NavigationBar(
         modifier = modifier
             .fillMaxWidth()
-            .background(navBarBackgroundColor, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .height(height)
+            .background(navBarBackgroundColor, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+//            .padding(horizontal = 16.dp, vertical = 8.dp),
         containerColor = Color.Transparent
+
     ) {
         navItems.forEach { item ->
             val isSelected = currentRoute == item.route

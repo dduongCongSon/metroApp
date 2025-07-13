@@ -12,9 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController // Import này cần thiết cho Preview
 
 val cardBackground = Color(0xFFF5F5F5)
 val orange = Color(0xFFFF9800)
@@ -88,7 +90,7 @@ fun YourTicket(navController: NavController) {
                             Box(
                                 modifier = Modifier
                                     .size(8.dp)
-                                    .background(green, CircleShape)
+                                    .background(primaryBlue, CircleShape)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
@@ -154,9 +156,7 @@ fun YourTicket(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { /* TODO: Show barcode */
-                        // Ví dụ: navController.navigate("barcode_screen")
-                    },
+                    onClick = { /* TODO: Show barcode */ },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = primaryBlue
@@ -172,4 +172,11 @@ fun YourTicket(navController: NavController) {
             }
         }
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun YourTicketPreview() {
+    val navController = rememberNavController()
+    YourTicket(navController = navController)
 }

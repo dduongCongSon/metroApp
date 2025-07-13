@@ -43,6 +43,7 @@ import org.com.metro.ui.screens.metro.ticketinformation.TicketInformationScreen
 import org.com.metro.ui.screens.osmap.OsmdroidMapScreen
 import org.com.metro.ui.screens.scanqr.ScanQRScreen
 import org.com.metro.ui.screens.stationselection.CalculatedFareScreen
+import org.com.metro.ui.screens.metro.setting.NotificationScreen
 import org.com.metro.ui.screens.stationselection.OrderFareInfoScreen
 import org.com.metro.ui.screens.stationselection.StationSelectionScreen
 import org.com.metro.ui.screens.stationselection.StationSelectionViewModel
@@ -114,7 +115,7 @@ sealed class Screen(val route: String) {
         fun createRoute(stationId: Int, stationName: String, actionType: String) = "scanQR/$stationId/$stationName/$actionType"
         const val defaultRoute = "scanQR/0/None"
     }
-
+    object Notification : Screen("notification")
     object OsmdroidMap : Screen("osmdroidMap")
     object Search : Screen("search_screen") // Đảm bảo route này tồn tại nếu bạn dùng nó trong BottomNav
 }
@@ -146,8 +147,6 @@ fun Navigation(
 
     val startDestination = if (isAuthenticated) Screen.Home.route else Screen.Login.route
 
-    // Tải hình ảnh background cho Top Bar
-    // ĐẢM BẢO BẠN CÓ TỆP ẢNH top_bar_bg.png TRONG THƯ MỤC res/drawable CỦA BẠN
     val topBarBackgroundImage = painterResource(id = R.drawable.topback)
 
     Scaffold(
@@ -179,27 +178,21 @@ fun Navigation(
                     Screen.BuyTicketDetail.route -> "Chi tiết vé"
                     Screen.OrderInfo.route -> "Thông tin đơn hàng"
                     Screen.Search.route -> "Tìm kiếm"
+                    Screen.Notification.route -> "Thông báo"
                     else -> "Metro App"
                 }
-
-                // Không cần định nghĩa topBarGradient nếu chỉ dùng ảnh nền
-                // val topBarGradient = Brush.verticalGradient(
-                //     colors = listOf(BluePrimary, BlueDark)
-                // )
 
                 CustomTopAppBar(
                     title = topBarTitle,
                     titleColor = Color.White,
                     iconColor = Color.White,
                     height = 70.dp,
-                    backgroundImage = topBarBackgroundImage, // Truyền ảnh vào đây
-                    // backgroundBrush = null, // Đặt null nếu không dùng gradient
+                    backgroundImage = topBarBackgroundImage,
                     navigationIcon = {
                         when (currentRoute) {
                             Screen.Home.route -> {
                                 Spacer(modifier = Modifier.width(48.dp))
                             }
-                            // Các màn hình có icon HOME
                             Screen.MyTicket.route,
                             Screen.BuyTicket.route,
                             Screen.Account.route -> {
@@ -212,11 +205,10 @@ fun Navigation(
                                     Icon(
                                         imageVector = Icons.Default.Home,
                                         contentDescription = "Trang chủ",
-                                        tint = Color.White // Đảm bảo icon màu trắng
+                                        tint = Color.White
                                     )
                                 }
                             }
-                            // Mặc định là nút quay lại cho các màn hình khác
                             else -> {
                                 IconButton(onClick = {
                                     if (navController.previousBackStackEntry != null) {
@@ -442,6 +434,10 @@ fun Navigation(
 
             composable(Screen.Search.route) {
                 PlaceholderScreen(navController, "Search Screen")
+            }
+
+            composable(Screen.Notification.route) {
+                NotificationScreen(navController)
             }
         }
     }

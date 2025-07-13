@@ -3,6 +3,7 @@ package org.com.metro.ui.components.common
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -48,6 +50,7 @@ import org.com.metro.R
 import org.com.metro.constant.UserRole
 import org.com.metro.ui.components.floatingButton.FloatingButton
 import org.com.metro.ui.components.quickaction.QuickActionsSection
+import org.com.metro.Screen
 
 @Composable
 fun AppHomeScreen(
@@ -118,7 +121,7 @@ fun AppHomeScreen(
                                 modifier = Modifier
                                     .size(50.dp)
                                     .background(Color.White, CircleShape)
-                                    .clickable { /* TODO: Open QR Code */ },
+                                    .clickable { navController.navigate(Screen.Notification.route) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -131,31 +134,36 @@ fun AppHomeScreen(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        OutlinedTextField(
-                            value = "",
-                            onValueChange = {},
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = {
-                                Text(
-                                    "Which station are you going to?",
-                                    color = Color.Gray.copy(alpha = 0.7f)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp) // Chiều cao tiêu chuẩn của TextField
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White) // Background màu trắng
+                                .border( // Thêm border để giống OutlinedTextField
+                                    width = 1.dp,
+                                    color = Color.Gray.copy(alpha = 0.4f), // Màu border mờ
+                                    shape = RoundedCornerShape(12.dp)
                                 )
-                            },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.Transparent,
-                                unfocusedBorderColor = Color.Transparent,
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(12.dp),
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    tint = Color.Gray
-                                )
-                            }
-                        )
+                                .clickable {
+                                    // Điều hướng tới Screen.StationSelection.route khi search bar được click
+                                    navController.navigate(Screen.StationSelection.route)
+                                }
+                                .padding(horizontal = 16.dp), // Padding nội dung bên trong
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Which station are you going to?",
+                                color = Color.Gray.copy(alpha = 0.7f),
+                                fontSize = 16.sp // Kích thước font giống placeholder
+                            )
+                        }
 
 
                         Row(
@@ -171,19 +179,6 @@ fun AppHomeScreen(
             }
 
             contentAfterBanner()
-        }
-
-        if (showFloatingButton) {
-            FloatingButton(
-                onClick = {
-                    Log.d("FloatingButton", "Clicked!")
-                },
-                icon = Icons.Default.Phone,
-                contentDescription = "Phone Icon",
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 50.dp, end = 16.dp)
-            )
         }
     }
 }

@@ -74,13 +74,16 @@ import androidx.compose.ui.platform.LocalContext
 import org.com.metro.R
 import org.com.metro.Screen
 
-private val PrimaryGreen = Color(0xFF4CAF50)
-private val DarkGreen = Color(0xFF388E3C)
-private val LightGreenBackground = Color(0xFFF1F8E9)
-private val TextPrimaryColor = Color(0xFF212121)
-private val TextSecondaryColor = Color(0xFF757575)
-private val CardBackgroundColor = Color.White
-private val DividerColor = Color.Black.copy(alpha = 0.08f)
+// Định nghĩa lại màu sắc để thống nhất với style mới
+private val AccentGreen = Color(0xFF4CAF50) // Màu xanh lá cây cho nút, checkmark
+private val BackgroundColor = Color(0xFFF5F5F5) // Màu nền tổng thể
+private val CardBackgroundColor = Color.White // Màu nền cho Card
+private val TextPrimaryColor = Color(0xFF1A237E) // Màu xanh đậm cho tiêu đề section
+private val TextSecondaryColor = Color(0xFF333333) // Màu chữ thông thường
+private val HintTextColor = Color(0xFF999999) // Màu chữ gợi ý/xám
+private val AccentBlue = Color(0xFF4A90E2) // Màu xanh dương cho điều khoản
+private val WarningRed = Color(0xFFE53935) // Màu đỏ cho lưu ý quan trọng
+private val DividerColorCustom = Color(0xFFE0E0E0) // Màu divider thống nhất
 
 data class LocalPaymentMethod(
     val id: Int,
@@ -94,8 +97,8 @@ fun OrderFareInfoScreen(
     navController: NavHostController,
     entryStationId: Int,
     exitStationId: Int,
-    fareMatrixViewModel: FareMatrixViewModel,
-    stationViewModel: StationSelectionViewModel
+    fareMatrixViewModel: FareMatrixViewModel = hiltViewModel(), // Thêm default hiltViewModel
+    stationViewModel: StationSelectionViewModel = hiltViewModel() // Thêm default hiltViewModel
 ) {
     val fareMatrixUiState by fareMatrixViewModel.uiState.collectAsState()
     val stationUiState by stationViewModel.uiState.collectAsState()
@@ -104,23 +107,21 @@ fun OrderFareInfoScreen(
     val entryStation = stationUiState.stations.find { it.stationId == entryStationId }
     val exitStation = stationUiState.stations.find { it.stationId == exitStationId }
 
-
     var showPaymentSheet by remember { mutableStateOf(false) }
     var showTermsDialog by remember { mutableStateOf(false) }
 
     val paymentMethods = listOf(
-        LocalPaymentMethod(1,"VNPAY", R.drawable.ic_vnpay),
-        LocalPaymentMethod(2,"MoMo",   R.drawable.ic_momo)
+        LocalPaymentMethod(1, "VNPAY", R.drawable.ic_vnpay),
+        LocalPaymentMethod(2, "MoMo", R.drawable.ic_momo)
     )
     var selectedPaymentMethod by remember { mutableStateOf(paymentMethods.first()) }
     val context = LocalContext.current
 
-    LaunchedEffect (key1 = fareMatrixUiState.createOrderResponse, key2 = fareMatrixUiState.createOrderError) {
+    LaunchedEffect(key1 = fareMatrixUiState.createOrderResponse, key2 = fareMatrixUiState.createOrderError) {
         val response = fareMatrixUiState.createOrderResponse
         if (response != null) {
             if (response.status == 200 && response.data != null) {
                 Toast.makeText(context, "Tạo đơn hàng thành công!", Toast.LENGTH_SHORT).show()
-
                 navController.navigate(Screen.MyTicket.route)
             } else {
                 Toast.makeText(context, response.message, Toast.LENGTH_LONG).show()
@@ -130,7 +131,6 @@ fun OrderFareInfoScreen(
 
         val error = fareMatrixUiState.createOrderError
         if (error != null) {
-            // Lỗi mạng hoặc lỗi hệ thống
             Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             fareMatrixViewModel.clearCreateOrderStatus()
         }
@@ -152,64 +152,81 @@ fun OrderFareInfoScreen(
         TermsAndConditionsDialog(onDismiss = { showTermsDialog = false })
     }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Thông tin đơn hàng", fontWeight = FontWeight.SemiBold, color = DarkGreen) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = DarkGreen)
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = CardBackgroundColor)
+    // Thay thế Scaffold bằng Column chính
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundColor) // Nền màu xám nhạt
+            .verticalScroll(rememberScrollState()) // Có thể cuộn
+            .padding(vertical = 16.dp), // Padding tổng thể cho nội dung màn hình
+        horizontalAlignment = Alignment.CenterHorizontally // Căn giữa các phần tử theo chiều ngang
+    ) {
+        // Top Bar (nếu muốn, có thể thêm vào đây, nhưng yêu cầu là không cần)
+        // Nếu bạn muốn top bar nhưng không phải của Scaffold, hãy đặt nó ở đây.
+        // Ví dụ: OrderFareInfoTopBar(...)
+
+        // Nội dung chính của màn hình
+        if (fareInfo != null && entryStation != null && exitStation != null) {
+            PaymentMethodSection(
+                selectedMethod = selectedPaymentMethod,
+                onClick = { showPaymentSheet = true }
             )
-        },
-        bottomBar = {
-            if (fareInfo != null) {
-                PaymentBottomBar(
-                    price = fareInfo.price,
-                    isLoading = fareMatrixUiState.isCreatingOrder,
-                    onPayClick = {
-                        // Gọi ViewModel để tạo đơn hàng
-                        fareMatrixViewModel.createSingleOrder(
-                            fareMatrixId = fareInfo.fareMatrixId,
-                            paymentMethodId = selectedPaymentMethod.id
-                        )
-                    },
-                    onTermsClick = { showTermsDialog = true }
-                )
+            Spacer(modifier = Modifier.height(16.dp)) // Khoảng cách giữa các section
+            PaymentInfoSection(fare = fareInfo, entryStation = entryStation, exitStation = exitStation)
+            Spacer(modifier = Modifier.height(16.dp))
+            TicketDetailsSection(entryStation = entryStation, exitStation = exitStation)
+        } else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Đang tải thông tin đơn hàng...")
             }
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(LightGreenBackground)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            if (fareInfo != null && entryStation != null && exitStation != null) {
-                PaymentMethodSection(
-                    selectedMethod = selectedPaymentMethod,
-                    onClick = { showPaymentSheet = true }
-                )
-                PaymentInfoSection(fare = fareInfo, entryStation = entryStation, exitStation = exitStation)
-                TicketDetailsSection(entryStation = entryStation, exitStation = exitStation)
-            } else {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Đang tải thông tin đơn hàng...")
-                }
-            }
+
+        Spacer(modifier = Modifier.height(16.dp)) // Khoảng cách trước bottom bar/nút
+
+        // Bottom Bar (đặt trực tiếp vào Column chính)
+        if (fareInfo != null) {
+            PaymentBottomBar(
+                price = fareInfo.price,
+                isLoading = fareMatrixUiState.isCreatingOrder,
+                onPayClick = {
+                    fareMatrixViewModel.createSingleOrder(
+                        fareMatrixId = fareInfo.fareMatrixId,
+                        paymentMethodId = selectedPaymentMethod.id
+                    )
+                },
+                onTermsClick = { showTermsDialog = true }
+            )
         }
+        Spacer(modifier = Modifier.height(16.dp)) // Khoảng cách cuối cùng
     }
 }
 
+// Hàm TopBar riêng, không sử dụng ở đây do yêu cầu "ko cần topbot bar"
+/*
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OrderFareInfoTopBar(
+    title: String,
+    onBackClick: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        title = { Text(title, fontWeight = FontWeight.SemiBold, color = DarkGreenCustom) },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = DarkGreenCustom)
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = CardBackgroundColor)
+    )
+}
+*/
+
 @Composable
 private fun PaymentMethodSection(selectedMethod: LocalPaymentMethod, onClick: () -> Unit) {
-    Column {
-        Text("Phương thức thanh toán", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimaryColor)
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp) // Padding horizontal cho cả Column
+    ) {
+        Text("Phương thức thanh toán", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = TextPrimaryColor)
         Spacer(Modifier.height(8.dp))
         Card(
             modifier = Modifier
@@ -217,7 +234,7 @@ private fun PaymentMethodSection(selectedMethod: LocalPaymentMethod, onClick: ()
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp) // Độ bóng nhẹ hơn
         ) {
             Row(
                 modifier = Modifier
@@ -233,9 +250,9 @@ private fun PaymentMethodSection(selectedMethod: LocalPaymentMethod, onClick: ()
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(Modifier.width(12.dp))
-                    Text(selectedMethod.name, color = TextPrimaryColor, fontWeight = FontWeight.SemiBold)
+                    Text(selectedMethod.name, color = TextSecondaryColor, fontWeight = FontWeight.Medium, fontSize = 14.sp) // Kích thước chữ
                 }
-                Icon(Icons.Filled.ChevronRight, contentDescription = "Select", tint = TextSecondaryColor)
+                Icon(Icons.Filled.ChevronRight, contentDescription = "Select", tint = HintTextColor) // Màu xám
             }
         }
     }
@@ -258,8 +275,9 @@ private fun PaymentMethodBottomSheet(
         ) {
             Text(
                 "Chọn phương thức thanh toán",
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
+                color = TextPrimaryColor, // Màu tiêu đề
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -277,12 +295,12 @@ private fun PaymentMethodBottomSheet(
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(method.name, modifier = Modifier.weight(1f), fontSize = 16.sp)
+                    Text(method.name, modifier = Modifier.weight(1f), fontSize = 16.sp, color = TextSecondaryColor)
                     if (method == selectedMethod) {
                         Icon(
                             Icons.Filled.CheckCircle,
                             contentDescription = "Selected",
-                            tint = PrimaryGreen
+                            tint = AccentBlue
                         )
                     }
                 }
@@ -295,22 +313,23 @@ private fun PaymentMethodBottomSheet(
 private fun TermsAndConditionsDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Điều khoản dịch vụ", fontWeight = FontWeight.Bold, color = DarkGreen) },
+        title = { Text("Điều khoản dịch vụ", fontWeight = FontWeight.Bold, color = TextPrimaryColor) }, // Màu tiêu đề
         text = {
             Text(
                 "Bằng việc sử dụng dịch vụ, bạn đồng ý tuân thủ tất cả các quy định về vận chuyển hành khách công cộng. " +
                         "Vé đã mua không thể hoàn trả. Vui lòng giữ vé cẩn thận để xuất trình khi có yêu cầu. " +
                         "Mọi hành vi gian lận sẽ bị xử lý theo quy định của pháp luật. " +
                         "Cảm ơn bạn đã sử dụng dịch vụ của Metro.",
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = TextSecondaryColor // Màu chữ nội dung
             )
         },
         confirmButton = {
             Button(
                 onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                colors = ButtonDefaults.buttonColors(containerColor = AccentBlue) // Màu nút
             ) {
-                Text("Đã hiểu")
+                Text("Đã hiểu", color = Color.White)
             }
         }
     )
@@ -320,13 +339,13 @@ private fun TermsAndConditionsDialog(onDismiss: () -> Unit) {
 private fun PaymentBottomBar(
     price: Int,
     onTermsClick: () -> Unit,
-    onPayClick : () -> Unit,
+    onPayClick: () -> Unit,
     isLoading: Boolean = false
-){
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 8.dp)
+            .shadow(elevation = 8.dp, spotColor = Color.Black.copy(alpha = 0.1f)) // Đổ bóng nhẹ nhàng
             .background(CardBackgroundColor)
             .padding(16.dp)
     ) {
@@ -336,7 +355,7 @@ private fun PaymentBottomBar(
                 pushStringAnnotation(tag = "TERMS", annotation = "TERMS")
                 withStyle(
                     style = SpanStyle(
-                        color = DarkGreen,
+                        color = AccentBlue, // Màu xanh dương cho điều khoản
                         fontWeight = FontWeight.Bold,
                         textDecoration = TextDecoration.Underline
                     )
@@ -358,7 +377,7 @@ private fun PaymentBottomBar(
                 modifier = Modifier.fillMaxWidth(),
                 style = LocalTextStyle.current.copy(
                     fontSize = 12.sp,
-                    color = TextSecondaryColor,
+                    color = HintTextColor,
                     textAlign = TextAlign.Center
                 )
             )
@@ -367,15 +386,21 @@ private fun PaymentBottomBar(
             Button(
                 onClick = onPayClick,
                 enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AccentBlue,
+                    disabledContainerColor = HintTextColor.copy(alpha = 0.5f)
+                )
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
                 } else {
                     Text("Thanh toán: ${price}đ", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }            }
+                }
+            }
         }
     }
 }
@@ -384,24 +409,26 @@ private fun PaymentBottomBar(
 private fun PaymentInfoSection(fare: FareMatrix, entryStation: Station, exitStation: Station) {
     val routeName = "${entryStation.name} – ${exitStation.name}"
 
-    Column {
-        Text("Thông tin thanh toán", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimaryColor)
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp) // Padding horizontal cho cả Column
+    ) {
+        Text("Thông tin thanh toán", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = TextPrimaryColor)
         Spacer(Modifier.height(8.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoRow(label = "Sản phẩm:", value = "Vé lượt: $routeName")
-                Divider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+                Divider(color = DividerColorCustom, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
                 InfoRow(label = "Đơn giá:", value = "${fare.price}đ")
-                Divider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+                Divider(color = DividerColorCustom, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
                 InfoRow(label = "Số lượng:", value = "1")
-                Divider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+                Divider(color = DividerColorCustom, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
                 InfoRow(label = "Thành tiền:", value = "${fare.price}đ")
-                Divider(color = DividerColor, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+                Divider(color = DividerColorCustom, thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
                 InfoRow(label = "Tổng giá tiền:", value = "${fare.price}đ", isTotal = true)
             }
         }
@@ -412,19 +439,21 @@ private fun PaymentInfoSection(fare: FareMatrix, entryStation: Station, exitStat
 private fun TicketDetailsSection(entryStation: Station, exitStation: Station) {
     val routeName = "${entryStation.name} – ${exitStation.name}"
 
-    Column {
-        Text("Thông tin vé lượt: $routeName", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimaryColor)
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp) // Padding horizontal cho cả Column
+    ) {
+        Text("Thông tin vé lượt: $routeName", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = TextPrimaryColor)
         Spacer(Modifier.height(8.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 InfoRow(label = "Loại vé:", value = "Vé lượt")
                 InfoRow(label = "HSD:", value = "30 ngày kể từ ngày mua")
-                InfoRow(label = "Lưu ý:", value = "Vé sử dụng một lần", valueColor = Color.Red)
+                InfoRow(label = "Lưu ý:", value = "Vé sử dụng một lần", valueColor = WarningRed) // Màu đỏ cho lưu ý
                 InfoRow(label = "Mô tả:", value = "Vé lượt: $routeName")
             }
         }
@@ -440,15 +469,15 @@ private fun InfoRow(label: String, value: String, isTotal: Boolean = false, valu
     ) {
         Text(
             text = label,
-            color = TextSecondaryColor,
-            fontSize = if (isTotal) 16.sp else 14.sp,
-            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal
+            color = HintTextColor,
+            fontSize = if (isTotal) 15.sp else 14.sp,
+            fontWeight = if (isTotal) FontWeight.Medium else FontWeight.Normal
         )
         Text(
             text = value,
-            color = valueColor ?: if (isTotal) DarkGreen else TextPrimaryColor,
-            fontSize = if (isTotal) 18.sp else 16.sp,
-            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.SemiBold
+            color = valueColor ?: if (isTotal) AccentGreen else TextSecondaryColor, // Màu xanh lá cho tổng cộng
+            fontSize = if (isTotal) 15.sp else 14.sp,
+            fontWeight = if (isTotal) FontWeight.Medium else FontWeight.Normal
         )
     }
 }

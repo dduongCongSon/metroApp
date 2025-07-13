@@ -1,6 +1,7 @@
 package org.com.metro.ui.screens.metro.setting
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack // Import ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DoneAll
@@ -34,11 +35,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.IconButton // Import IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,223 +45,205 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.Alignment.Vertical
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import org.com.metro.ui.screens.metro.account.DarkGreen
-import org.com.metro.ui.screens.metro.account.LightGreen
-import org.com.metro.ui.screens.metro.account.PrimaryGreen
-import org.com.metro.ui.screens.metro.account.SecondaryGreen
+import org.com.metro.ui.theme.BlueDark
+import org.com.metro.ui.theme.BluePrimary
+import org.com.metro.ui.theme.BlueLight
+import org.com.metro.ui.theme.AppCyan // Giữ nguyên AppCyan nếu nó được định nghĩa ở đây
+
+// Các màu phụ trợ
+private val BackgroundLightGray = Color(0xFFF0F2F5)
+private val TextDark = Color(0xFF333333)
+private val TextMedium = Color(0xFF666666)
+private val TextLight = Color(0xFF999999)
+private val WarningColor = Color(0xFFFF9800)
+private val ImportantColor = Color(0xFFFF5722)
+private val CardBackground = Color.White // Thêm màu nền cho Card
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(navController: NavController) {
-    Scaffold (
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Thông báo",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PrimaryGreen
-                ),
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Mark all as read */ }) {
-                        Icon(
-                            Icons.Default.DoneAll,
-                            contentDescription = "Mark all read",
-                            tint = Color.White
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        Column (
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundLightGray) // Áp dụng màu nền tổng thể
+            .verticalScroll(rememberScrollState()) // Cho phép cuộn
+    ) {
+        // Header Stats Card
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp), // Điều chỉnh padding
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = BlueLight.copy(alpha = 0.5f)),
+
         ) {
-            // Header Stats
-            Card (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = LightGreen),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Row (
-                    modifier = Modifier.padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column (
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            Icons.Default.Notifications,
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = PrimaryGreen
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "5",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = DarkGreen
-                        )
-                        Text(
-                            "Mới",
-                            fontSize = 12.sp,
-                            color = Color(0xFF666666)
-                        )
-                    }
-
-                    Divider(
-                        modifier = Modifier
-                            .height(60.dp)
-                            .width(1.dp),
-                        color = PrimaryGreen.copy(alpha = 0.3f)
-                    )
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            Icons.Default.Archive,
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp),
-                            tint = SecondaryGreen
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "12",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = DarkGreen
-                        )
-                        Text(
-                            "Đã đọc",
-                            fontSize = 12.sp,
-                            color = Color(0xFF666666)
-                        )
-                    }
-                }
-            }
-
-            // Filter Tabs
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxWidth() // Đảm bảo Row chiếm toàn bộ chiều rộng
+                    .padding(vertical = 20.dp), // Padding dọc lớn hơn
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                FilterChip(
-                    onClick = { },
-                    label = {
-                        Text("Tất cả") },
-                    selected = true,
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = PrimaryGreen,
-                        selectedLabelColor = Color.White
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp),
+                        tint = BluePrimary
                     )
+                    Spacer(modifier = Modifier.height(10.dp)) // Tăng khoảng cách
+                    Text(
+                        "5",
+                        fontSize = 28.sp, // Kích thước chữ lớn hơn
+                        fontWeight = FontWeight.ExtraBold, // Đậm hơn
+                        color = BlueDark
+                    )
+                    Text(
+                        "Mới",
+                        fontSize = 14.sp, // Kích thước chữ vừa phải
+                        color = TextMedium
+                    )
+                }
+
+                Divider(
+                    modifier = Modifier
+                        .height(80.dp) // Divider cao hơn
+                        .width(1.dp),
+                    color = BluePrimary.copy(alpha = 0.4f)
                 )
-                FilterChip(
-                    onClick = { },
-                    label = {
-                        Text("Chưa đọc") },
-                    selected = false
-                )
-                FilterChip(
-                    onClick = { },
-                    label = { Text("Quan trọng") },
-                    selected = false
-                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.Archive,
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp),
+                        tint = AppCyan
+                    )
+                    Spacer(modifier = Modifier.height(10.dp)) // Tăng khoảng cách
+                    Text(
+                        "12",
+                        fontSize = 28.sp, // Kích thước chữ lớn hơn
+                        fontWeight = FontWeight.ExtraBold, // Đậm hơn
+                        color = BlueDark
+                    )
+                    Text(
+                        "Đã đọc",
+                        fontSize = 14.sp, // Kích thước chữ vừa phải
+                        color = TextMedium
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Notifications List
-            NotificationItem(
-                title = "Xác thực CCCD thành công",
-                message = "Căn cước công dân của bạn đã được xác thực thành công. Bạn có thể sử dụng các tính năng liên kết với CCCD.",
-                time = "2 phút trước",
-                isRead = false,
-                isImportant = true,
-                icon = Icons.Default.CheckCircle,
-                iconColor = PrimaryGreen
-            )
-
-            NotificationItem(
-                title = "Cập nhật ứng dụng",
-                message = "Phiên bản mới 1.3.20 đã có sẵn với nhiều tính năng cải tiến và sửa lỗi.",
-                time = "1 giờ trước",
-                isRead = false,
-                isImportant = false,
-                icon = Icons.Default.SystemUpdate,
-                iconColor = Color(0xFF2196F3)
-            )
-
-            NotificationItem(
-                title = "Gia hạn CCCD sắp hết hạn",
-                message = "CCCD của bạn sẽ hết hạn trong 30 ngày. Vui lòng liên hệ cơ quan có thẩm quyền để gia hạn.",
-                time = "3 giờ trước",
-                isRead = false,
-                isImportant = true,
-                icon = Icons.Default.Warning,
-                iconColor = Color(0xFFFF9800)
-            )
-
-            NotificationItem(
-                title = "Bảo trì hệ thống",
-                message = "Hệ thống sẽ được bảo trì từ 2:00 - 4:00 sáng ngày mai. Các tính năng có thể bị gián đoạn.",
-                time = "5 giờ trước",
-                isRead = true,
-                isImportant = false,
-                icon = Icons.Default.Build,
-                iconColor = Color(0xFF607D8B)
-            )
-
-            NotificationItem(
-                title = "Khuyến mãi vé tháng",
-                message = "Giảm 20% cho vé tháng học sinh - sinh viên. Áp dụng từ ngày 1-15 tháng này.",
-                time = "1 ngày trước",
-                isRead = true,
-                isImportant = false,
-                icon = Icons.Default.LocalOffer,
-                iconColor = Color(0xFFE91E63)
-            )
-
-            NotificationItem(
-                title = "Cập nhật chính sách bảo mật",
-                message = "Chúng tôi đã cập nhật chính sách bảo mật để bảo vệ thông tin cá nhân của bạn tốt hơn.",
-                time = "2 ngày trước",
-                isRead = true,
-                isImportant = false,
-                icon = Icons.Default.Security,
-                iconColor = PrimaryGreen
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
+
+        // Filter Tabs
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp), // Điều chỉnh padding
+            horizontalArrangement = Arrangement.spacedBy(10.dp) // Tăng khoảng cách giữa các chip
+        ) {
+            NotificationFilterChip(label = "Tất cả", selected = true) { /* Handle filter */ }
+            NotificationFilterChip(label = "Chưa đọc", selected = false) { /* Handle filter */ }
+            NotificationFilterChip(label = "Quan trọng", selected = false) { /* Handle filter */ }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp)) // Khoảng cách nhỏ hơn trước danh sách
+
+        // Notifications List
+        NotificationItem(
+            title = "Xác thực CCCD thành công",
+            message = "Căn cước công dân của bạn đã được xác thực thành công. Bạn có thể sử dụng các tính năng liên kết với CCCD.",
+            time = "2 phút trước",
+            isRead = false,
+            isImportant = true,
+            icon = Icons.Default.CheckCircle,
+            iconColor = BluePrimary
+        )
+
+        NotificationItem(
+            title = "Cập nhật ứng dụng",
+            message = "Phiên bản mới 1.3.20 đã có sẵn với nhiều tính năng cải tiến và sửa lỗi.",
+            time = "1 giờ trước",
+            isRead = false,
+            isImportant = false,
+            icon = Icons.Default.SystemUpdate,
+            iconColor = BluePrimary
+        )
+
+        NotificationItem(
+            title = "Gia hạn CCCD sắp hết hạn",
+            message = "CCCD của bạn sẽ hết hạn trong 30 ngày. Vui lòng liên hệ cơ quan có thẩm quyền để gia hạn.",
+            time = "3 giờ trước",
+            isRead = false,
+            isImportant = true,
+            icon = Icons.Default.Warning,
+            iconColor = WarningColor
+        )
+
+        NotificationItem(
+            title = "Bảo trì hệ thống",
+            message = "Hệ thống sẽ được bảo trì từ 2:00 - 4:00 sáng ngày mai. Các tính năng có thể bị gián đoạn.",
+            time = "5 giờ trước",
+            isRead = true,
+            isImportant = false,
+            icon = Icons.Default.Build,
+            iconColor = TextMedium
+        )
+
+        NotificationItem(
+            title = "Khuyến mãi vé tháng",
+            message = "Giảm 20% cho vé tháng học sinh - sinh viên. Áp dụng từ ngày 1-15 tháng này.",
+            time = "1 ngày trước",
+            isRead = true,
+            isImportant = false,
+            icon = Icons.Default.LocalOffer,
+            iconColor = ImportantColor
+        )
+
+        NotificationItem(
+            title = "Cập nhật chính sách bảo mật",
+            message = "Chúng tôi đã cập nhật chính sách bảo mật để bảo vệ thông tin cá nhân của bạn tốt hơn.",
+            time = "2 ngày trước",
+            isRead = true,
+            isImportant = false,
+            icon = Icons.Default.Security,
+            iconColor = BluePrimary
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NotificationFilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    FilterChip(
+        onClick = onClick,
+        label = { Text(label, fontSize = 13.sp) }, // Điều chỉnh kích thước chữ
+        selected = selected,
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = BluePrimary,
+            selectedLabelColor = Color.White,
+            containerColor = CardBackground, // Nền trắng khi không chọn
+            labelColor = TextDark // Chữ màu tối khi không chọn
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = selected,
+            borderColor = BluePrimary.copy(alpha = 0.5f),
+            selectedBorderColor = BluePrimary,
+            borderWidth = 1.dp,
+            selectedBorderWidth = 1.5.dp // Border dày hơn khi chọn
+        ),
+        shape = RoundedCornerShape(20.dp) // Bo góc nhiều hơn cho chip
+    )
 }
 
 @Composable
@@ -279,12 +259,12 @@ fun NotificationItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(12.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp) // Tăng padding dọc giữa các item
+            .clickable { /* TODO: Handle notification item click */ }, // Thêm clickable cho mỗi item
+        shape = RoundedCornerShape(16.dp), // Bo góc nhiều hơn
         colors = CardDefaults.cardColors(
-            containerColor = if (isRead) Color.White else LightGreen.copy(alpha = 0.3f)
+            containerColor = if (isRead) CardBackground else BlueLight.copy(alpha = 0.1f) // Nền mềm mại hơn cho chưa đọc
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isRead) 1.dp else 3.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -292,11 +272,11 @@ fun NotificationItem(
         ) {
             // Icon with background
             Card(
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(12.dp), // Bo góc nhiều hơn cho icon background
                 colors = CardDefaults.cardColors(
-                    containerColor = iconColor.copy(alpha = 0.1f)
+                    containerColor = iconColor.copy(alpha = 0.1f) // Nền icon nhẹ nhàng hơn
                 ),
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(48.dp) // Icon background lớn hơn
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -306,12 +286,12 @@ fun NotificationItem(
                         icon,
                         contentDescription = null,
                         tint = iconColor,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(28.dp) // Icon lớn hơn
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp)) // Tăng khoảng cách
 
             // Content
             Column(
@@ -322,9 +302,9 @@ fun NotificationItem(
                 ) {
                     Text(
                         title,
-                        fontSize = 14.sp,
-                        fontWeight = if (isRead) FontWeight.Medium else FontWeight.Bold,
-                        color = DarkGreen,
+                        fontSize = 16.sp, // Tiêu đề lớn hơn
+                        fontWeight = if (isRead) FontWeight.SemiBold else FontWeight.Bold, // Điều chỉnh độ đậm
+                        color = BlueDark,
                         modifier = Modifier.weight(1f)
                     )
 
@@ -332,19 +312,19 @@ fun NotificationItem(
                         Icon(
                             Icons.Default.PriorityHigh,
                             contentDescription = "Important",
-                            tint = Color(0xFFFF5722),
-                            modifier = Modifier.size(16.dp)
+                            tint = ImportantColor,
+                            modifier = Modifier.size(18.dp) // Icon quan trọng lớn hơn
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                     }
 
                     if (!isRead) {
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
+                                .size(10.dp) // Dấu chấm tròn lớn hơn
                                 .background(
-                                    PrimaryGreen,
-                                    shape = RoundedCornerShape(4.dp)
+                                    BluePrimary,
+                                    shape = RoundedCornerShape(5.dp)
                                 )
                         )
                     }
@@ -352,17 +332,17 @@ fun NotificationItem(
 
                 Text(
                     message,
-                    fontSize = 13.sp,
-                    color = Color(0xFF666666),
-                    lineHeight = 18.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    fontSize = 14.sp, // Nội dung lớn hơn
+                    color = TextMedium,
+                    lineHeight = 20.sp, // Tăng chiều cao dòng
+                    modifier = Modifier.padding(top = 6.dp) // Tăng khoảng cách trên
                 )
 
                 Text(
                     time,
-                    fontSize = 11.sp,
-                    color = Color(0xFF999999),
-                    modifier = Modifier.padding(top = 8.dp)
+                    fontSize = 12.sp, // Thời gian lớn hơn một chút
+                    color = TextLight,
+                    modifier = Modifier.padding(top = 10.dp) // Tăng khoảng cách trên
                 )
             }
         }
@@ -373,5 +353,5 @@ fun NotificationItem(
 @Composable
 fun NotificationScreenPreview() {
     NotificationScreen(
-        navController = NavController(LocalContext.current)) // Replace with actual NavController context
+        navController = NavController(LocalContext.current))
 }
