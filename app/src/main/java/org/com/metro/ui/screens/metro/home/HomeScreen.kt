@@ -13,12 +13,12 @@ import androidx.navigation.compose.rememberNavController
 import org.com.metro.constant.UserRole
 import org.com.metro.ui.components.common.AppHomeScreen
 import org.com.metro.ui.screens.guide.GuideSection
-import org.com.metro.ui.screens.news.NewsSection
 import org.com.metro.ui.screens.metro.myticket.YourTicket
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import org.com.metro.ui.screens.login.LoginViewModel
+import org.com.metro.ui.screens.news.BlogSection
 
 @Composable
 fun HomeScreen(navController: NavHostController,
@@ -48,7 +48,7 @@ fun HomeScreen(navController: NavHostController,
         item {
             Spacer(modifier = Modifier.height(10.dp))
             Box(modifier = Modifier.padding(start = 16.dp)) {
-                NewsSection(navController)
+                BlogSection(navController)
             }
         }
     }

@@ -43,7 +43,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import org.com.metro.repositories.apis.order.OrderWithTicketDetails
+import org.com.metro.ui.screens.metro.buyticket.BuyTicketScreen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -281,3 +284,10 @@ private fun getStatusColor(status: String): Color {
         else -> TextMedium
     }
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//fun MyTicketScreen() {
+//    val navController = rememberNavController()
+//    BuyTicketScreen(navController = navController)
+//}

@@ -2,7 +2,6 @@ package org.com.metro.repositories.apis.auth
 
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
 
 
@@ -14,7 +13,7 @@ data class AccessTokenData(
 data class FullApiResponse(
     val status: Int,
     val message: String,
-    val data: AccessTokenData? // Trường 'data' chứa AccessTokenData
+    val data: AccessTokenData?
 )
 data class UserProfileResponse(
     val status: Int,
@@ -26,14 +25,15 @@ data class UserProfileData(
     val userId: String,
     val name: String,
     val email: String,
+    val role: String,
    )
 
 interface AuthApi {
-    @POST("api/v1/auth/oauth2/google")
+    @POST("api/auth/oauth2/google")
 
     suspend fun loginWithGoogle(@Body request: GoogleLoginRequest): FullApiResponse
 
-    @GET("api/v1/auth/profile")
+    @GET("api/auth/profile")
     suspend fun getUserProfile(): UserProfileResponse
 }
 

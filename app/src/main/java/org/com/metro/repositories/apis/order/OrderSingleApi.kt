@@ -1,12 +1,9 @@
 package org.com.metro.repositories.apis.order
 
-import retrofit2.Response
-import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 
 data class TransactionData(
@@ -42,14 +39,13 @@ data class FareMatrixIdObject(
 
 data class CreateOrderRequest(
     val fareMatrixId: FareMatrixIdObject,
-    val paymentMethodId: Int
+    val paymentMethodId: Int //1: VN_PAY, 2: Stripe
 )
 
 data class CreatedOrderData(
     val orderId: Int,
     val ticketId: String,
     val status: String
-    // Bạn có thể thêm các trường khác từ response nếu cần
 )
 
 data class CreateOrderResponse(
@@ -75,10 +71,9 @@ data class OrderWithTicketDetails(
     val userId: Int,
     val status: String,
     val amount: Double,
-    val ticket: TicketDetails? // Đối tượng ticket lồng nhau
+    val ticket: TicketDetails?
 )
 
-// Lớp này đại diện cho toàn bộ response từ API /api/orders/user/details
 data class UserOrdersDetailsResponse(
     val status: Int,
     val message: String,
@@ -100,7 +95,6 @@ data class SingleTicketDetails(
     val updatedAt: String
 )
 
-// Lớp này đại diện cho toàn bộ response từ API
 data class TicketDetailsResponse(
     val status: Int,
     val message: String,

@@ -66,8 +66,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    implementation(libs.androidx.foundation)
-
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
 
@@ -81,6 +79,10 @@ dependencies {
 
     implementation(libs.composeIcons.fontAwesome)
 
+    implementation(libs.jackson.datatype.jsr310)
+    implementation(libs.jackson.annotations)
+    implementation(libs.jackson.core)
+    implementation(libs.jackson.databind)
 
     implementation(libs.okhttp)
 
@@ -106,6 +108,7 @@ dependencies {
     implementation(libs.appauth)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.animation)
+    implementation("com.stripe:stripe-android:20.42.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

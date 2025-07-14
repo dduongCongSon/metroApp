@@ -25,6 +25,8 @@ import org.com.metro.ui.screens.login.LoginViewModel
 import org.com.metro.ui.screens.metro.PlaceholderScreen
 import org.com.metro.ui.screens.metro.account.AccountScreen
 import org.com.metro.ui.screens.metro.account.CCCDScreen
+import org.com.metro.ui.screens.staffhome.StaffAccountScreen
+import org.com.metro.ui.screens.metro.feedback.CreateFeedbackScreen
 import org.com.metro.ui.screens.metro.account.LinkCCCDScreen
 import org.com.metro.ui.screens.metro.account.RegisterFormScreen
 import org.com.metro.ui.screens.metro.buyticket.BuyTicketScreen
@@ -50,6 +52,7 @@ import org.com.metro.ui.screens.stationselection.StationSelectionViewModel
 import androidx.compose.runtime.getValue
 import org.com.metro.ui.screens.metro.myticket.TicketQRCodeScreen
 import androidx.compose.material3.Scaffold
+import org.com.metro.ui.screens.stationselection.StaffStationSelectionScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -67,6 +70,8 @@ import androidx.compose.ui.res.painterResource // Để tải ảnh từ drawabl
 
 import org.com.metro.ui.components.bottomNav.AppBottomNavigationBar
 import org.com.metro.ui.components.topNav.CustomTopAppBar
+import org.com.metro.ui.screens.scanqr.ActionType
+import org.com.metro.ui.screens.scanqr.ScanQRViewModel
 import org.com.metro.ui.theme.BlueDark
 import org.com.metro.ui.theme.BluePrimary
 
@@ -75,8 +80,14 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Home : Screen("home")
     object Feedback : Screen("feedback")
+    object StaffStationSelectionScreen : Screen("stationSelect/{actionType}") {
+        fun createRoute(actionType: ActionType): String {
+            return "stationSelect/${actionType.name}"
+        }
+    }
     object RedeemCodeForTicket : Screen("redeemCodeForTicket")
     object MyTicket : Screen("myTicket")
+    object StaffAccount : Screen("staffAccount")
 
     object BuyTicket : Screen("buyTicket")
     object BuyTicketDetail : Screen("buyTicketDetail/{ticketId}")
@@ -96,7 +107,7 @@ sealed class Screen(val route: String) {
         fun createRoute(ticketCode: String) = "ticket_qr_code/$ticketCode"
     }
     object TicketFlow : Screen("ticket_flow")
-
+    object CreateFeedback : Screen("createFeedback")
     object Route : Screen("route")
     object Maps : Screen("maps")
     object VirtualTour : Screen("virtualTour")
@@ -263,13 +274,25 @@ fun Navigation(
                 )
             }
 
+            composable(Screen.StaffAccount.route) {
+                StaffAccountScreen(
+                    navController = navController,
+                    viewModel = loginViewModel
+                )
+            }
+
             composable(Screen.RedeemCodeForTicket.route) {
                 RedeemCodeForTicketScreen(navController)
+            }
+
+            composable(Screen.CreateFeedback.route) {
+                CreateFeedbackScreen(navController)
             }
 
             composable(Screen.MyTicket.route) {
                 MyTicketScreen(navController)
             }
+
 
             composable(Screen.Feedback.route) {
                 FeedbackScreen(navController)
@@ -312,6 +335,26 @@ fun Navigation(
                 }
 
                 composable(
+                    route = Screen.StaffStationSelectionScreen.route,
+                    arguments = listOf(
+                        navArgument("actionType") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val actionTypeString = backStackEntry.arguments?.getString("actionType")
+                    val actionType = try {
+                        ActionType.valueOf(actionTypeString ?: ActionType.ENTRY.name)
+                    } catch (e: IllegalArgumentException) {
+                        ActionType.ENTRY // fallback
+                    }
+
+                    StaffStationSelectionScreen(
+                        navController = navController,
+                        stationViewModel = hiltViewModel<StationSelectionViewModel>(),
+                        actionType = actionType
+                    )
+                }
+
+                composable(
                     route = Screen.OrderFareInfo.route,
                     arguments = listOf(
                         navArgument("entryStationId") { type = NavType.IntType },
@@ -341,7 +384,7 @@ fun Navigation(
                 TicketQRCodeScreen(navController = navController, ticketCode = ticketCode)
             }
             composable(
-                Screen.ScanQrCode.route,
+                route = "scanQR/{stationId}/{stationName}/{actionType}",
                 arguments = listOf(
                     navArgument("stationId") { type = NavType.IntType },
                     navArgument("stationName") { type = NavType.StringType },
@@ -350,20 +393,22 @@ fun Navigation(
             ) { backStackEntry ->
                 val stationId = backStackEntry.arguments?.getInt("stationId") ?: 0
                 val stationName = backStackEntry.arguments?.getString("stationName") ?: ""
-                val actionType = backStackEntry.arguments?.getString("actionType") ?: "Entry"
+                val actionTypeString = backStackEntry.arguments?.getString("actionType")
 
-                if (stationId == 0 || stationName == "None") {
-                    LaunchedEffect(Unit) {
-                        navController.navigate("stationSelect")
-                    }
-                } else {
-                    ScanQRScreen(
-                        navController,
-                        stationId,
-                        stationName,
-                        actionType
-                    )
+                val actionType = try {
+                    ActionType.valueOf(actionTypeString ?: ActionType.ENTRY.name)
+                } catch (e: IllegalArgumentException) {
+                    ActionType.ENTRY
                 }
+
+                val viewModel: ScanQRViewModel = hiltViewModel()
+                ScanQRScreen(
+                    navController,
+                    stationId,
+                    stationName,
+                    viewModel,
+                    actionType
+                )
             }
 
             composable(Screen.Home.route) {

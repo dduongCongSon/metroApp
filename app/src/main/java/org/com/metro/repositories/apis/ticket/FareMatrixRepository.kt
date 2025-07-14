@@ -1,6 +1,5 @@
 package org.com.metro.repositories.apis.ticket
 
-import com.google.gson.Gson
 import org.com.metro.FareMatrix
 import org.com.metro.FareMatrixResponse
 import javax.inject.Inject
